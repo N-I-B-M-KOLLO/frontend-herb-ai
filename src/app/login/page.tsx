@@ -4,7 +4,6 @@ import React from "react";
 import { Input } from "@/components/ui/input"; // adjust paths if needed
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button"; // or wherever it is
- 
 
 export default function Login() {
   const handleSubmit = (e: React.FormEvent) => {
