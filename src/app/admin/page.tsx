@@ -1,21 +1,51 @@
-// app/login/page.tsx or wherever your Login component lives
 "use client";
-import React from "react";
-import { Input } from "@/components/ui/input"; // adjust paths if needed
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button"; // or wherever it is
+import React, { useState } from "react";
+import { InputField } from "@/components/ui/InputField";
+import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
-export default function Login() {
+export default function AdminLogin() {
   const router = useRouter();
+
+  // State for form inputs and validation errors
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
+    {}
+  );
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle login logic here
+
+    // Reset errors
+    setErrors({});
+
+    // Validation logic
+    const newErrors: { email?: string; password?: string } = {};
+    if (!email) {
+      newErrors.email = "Email is required.";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      newErrors.email = "Please enter a valid email address.";
+    }
+
+    if (!password) {
+      newErrors.password = "Password is required.";
+    } else if (password.length < 6) {
+      newErrors.password = "Password must be at least 6 characters long.";
+    }
+
+    // If there are validation errors, set them and stop submission
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    // Handle successful form submission (e.g., API call)
+    console.log("Admin form submitted:", { email, password });
   };
 
   const handleLoginClick = () => {
-    router.push("/login"); // Navigate to the /login page
+    router.push("/login"); // Navigate back to the user login page
   };
 
   return (
@@ -28,30 +58,30 @@ export default function Login() {
           Admin Login
         </h2>
 
-        <div>
-          <Label htmlFor="email">Email</Label>
-          <Input
-            id="email"
-            type="email"
-            placeholder="you@example.com"
-            required
-            className="mt-1"
-          />
-        </div>
+        <InputField
+          id="email"
+          label="Email"
+          type="email"
+          placeholder="admin@example.com"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          error={errors.email}
+        />
 
-        <div>
-          <Label htmlFor="password">Password</Label>
-          <Input
-            id="password"
-            type="password"
-            placeholder="••••••••"
-            required
-            className="mt-1"
-          />
-        </div>
+        <InputField
+          id="password"
+          label="Password"
+          type="password"
+          placeholder="••••••••"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          error={errors.password}
+        />
+
         <Button type="submit" className="w-full">
           Login
         </Button>
+
         <div>
           <label
             htmlFor="backToLogin"
