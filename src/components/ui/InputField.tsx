@@ -34,7 +34,7 @@ export const InputField: React.FC<InputFieldProps> = ({
         placeholder={placeholder}
         value={value}
         onChange={onChange}
-        required={required}
+        required={required} // Still adds semantic meaning
         className={`mt-1 ${error ? "border-red-500" : ""} ${className}`}
       />
       {error && <p className="text-sm text-red-500 mt-1">{error}</p>}

@@ -52,6 +52,7 @@ export default function AdminLogin() {
     <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-zinc-900 px-4">
       <form
         onSubmit={handleSubmit}
+        noValidate // Disable browser's native validation
         className="w-full max-w-sm space-y-6 rounded-xl bg-white dark:bg-zinc-800 p-8 shadow-md dark:shadow-xl"
       >
         <h2 className="text-2xl font-bold text-center text-black dark:text-white">
@@ -66,6 +67,7 @@ export default function AdminLogin() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           error={errors.email}
+          required
         />
 
         <InputField
@@ -76,6 +78,7 @@ export default function AdminLogin() {
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           error={errors.password}
+          required
         />
 
         <Button type="submit" className="w-full">
