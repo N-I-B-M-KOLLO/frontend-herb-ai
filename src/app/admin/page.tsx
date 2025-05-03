@@ -4,7 +4,7 @@ import { InputField } from "@/components/ui/InputField";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
-export default function Login() {
+export default function AdminLogin() {
   const router = useRouter();
 
   // State for form inputs and validation errors
@@ -41,11 +41,11 @@ export default function Login() {
     }
 
     // Handle successful form submission (e.g., API call)
-    console.log("Form submitted:", { email, password });
+    console.log("Admin form submitted:", { email, password });
   };
 
-  const handleAdminLoginClick = () => {
-    router.push("/admin"); // Navigate to the /admin page
+  const handleLoginClick = () => {
+    router.push("/login"); // Navigate back to the user login page
   };
 
   return (
@@ -56,14 +56,14 @@ export default function Login() {
         className="w-full max-w-sm space-y-6 rounded-xl bg-white dark:bg-zinc-800 p-8 shadow-md dark:shadow-xl"
       >
         <h2 className="text-2xl font-bold text-center text-black dark:text-white">
-          User Login
+          Admin Login
         </h2>
 
         <InputField
           id="email"
           label="Email"
           type="email"
-          placeholder="you@example.com"
+          placeholder="admin@example.com"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           error={errors.email}
@@ -89,9 +89,9 @@ export default function Login() {
           <label
             htmlFor="backToLogin"
             className="block text-center cursor-pointer text-blue-500 hover:underline"
-            onClick={handleAdminLoginClick}
+            onClick={handleLoginClick}
           >
-            Admin Login
+            Back to User Login
           </label>
         </div>
       </form>
