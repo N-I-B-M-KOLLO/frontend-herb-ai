@@ -1,23 +1,65 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-
-// Optional: You can use your own button or use a regular HTML button
-const Button = ({ children, className = "", ...props }: React.ButtonHTMLAttributes<HTMLButtonElement>) => (
-  <button
-    className={`bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition duration-300 ${className}`}
-    {...props}
-  >
-    {children}
-  </button>
-);
+import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/store/useAuthStore";
+import { authService } from "@/lib/api";
 
 export default function Signup() {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  
+  const router = useRouter();
+  const { isAuthenticated } = useAuthStore();
+
+ 
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard");
+    }
+  }, [isAuthenticated, router]);
+
+ 
+  useEffect(() => {
+    if (confirmPassword && password !== confirmPassword) {
+      setPasswordError("Passwords do not match");
+    } else {
+      setPasswordError("");
+    }
+  }, [password, confirmPassword]);
+
+  // React Query mutation for signup
+  const signupMutation = useMutation({
+    mutationFn: (userData: { username: string; password: string }) => 
+      authService.register(userData),
+    onSuccess: () => {
+      toast.success("Account created successfully!");
+      router.push("/login");
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onError: (error: any) => {
+      toast.error(error.response?.data?.detail || "Signup failed");
+    }
+  });
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle sign-up logic here
+    
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    
+    signupMutation.mutate({ username, password });
   };
 
   return (
@@ -27,30 +69,58 @@ export default function Signup() {
         className="w-full max-w-sm space-y-6 rounded-xl bg-white dark:bg-zinc-800 p-8 shadow-md dark:shadow-xl"
       >
         <h2 className="text-2xl font-bold text-center text-black dark:text-white">Create an Account</h2>
-
         <div>
-          <Label htmlFor="name">Full Name</Label>
-          <Input id="name" type="text" placeholder="John Doe" required className="mt-1" />
+          <Label htmlFor="username">Username</Label>
+          <Input 
+            id="username" 
+            type="text" 
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="johndoe" 
+            required 
+            className="mt-1" 
+          />
         </div>
-
-        <div>
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="you@example.com" required className="mt-1" />
-        </div>
-
         <div>
           <Label htmlFor="password">Password</Label>
-          <Input id="password" type="password" placeholder="••••••••" required className="mt-1" />
+          <Input 
+            id="password" 
+            type="password" 
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••" 
+            required 
+            className="mt-1" 
+          />
         </div>
-
         <div>
           <Label htmlFor="confirmPassword">Confirm Password</Label>
-          <Input id="confirmPassword" type="password" placeholder="••••••••" required className="mt-1" />
+          <Input 
+            id="confirmPassword" 
+            type="password" 
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="••••••••" 
+            required 
+            className="mt-1" 
+          />
+          {passwordError && (
+            <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+          )}
         </div>
-
-        <Button type="submit" className="w-full">
-          Sign Up
+        <Button 
+          type="submit" 
+          className="w-full"
+          disabled={signupMutation.isPending || !!passwordError}
+        >
+          {signupMutation.isPending ? "Creating Account..." : "Sign Up"}
         </Button>
+        <div className="text-center text-sm">
+          Already have an account?{" "}
+          <Link href="/login" className="text-blue-600 hover:underline">
+            Login
+          </Link>
+        </div>
       </form>
     </div>
   );

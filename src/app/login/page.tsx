@@ -1,98 +1,110 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
-import React, { useState } from "react";
-import { InputField } from "@/components/ui/InputField";
-import { Button } from "@/components/ui/button";
+
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useMutation } from "@tanstack/react-query";
+import toast from "react-hot-toast";
+
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { useAuthStore } from "@/store/useAuthStore";
+import { authService } from "@/lib/api";
 
 export default function Login() {
-  const router = useRouter();
-
-  // State for form inputs and validation errors
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-    {}
-  );
+  const router = useRouter();
+  
+  const { setToken, setUser, isAuthenticated } = useAuthStore();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      router.push("/dashboard");
+    }
+  }, [isAuthenticated, router]);
+
+  // React Query mutation for login
+  const loginMutation = useMutation({
+    mutationFn: ({ username, password }: { username: string; password: string }) => 
+      authService.login(username, password),
+    onSuccess: async (data) => {
+      setToken(data.access_token);
+      
+      
+      try {
+        const userData = await authService.getCurrentUser();
+        setUser(userData);
+        
+        toast.success("Login successful!");
+        
+      
+        if (userData.is_admin) {
+          router.push("/admin/dashboard");
+        } else {
+          router.push("/dashboard");
+        }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        toast.error("Error getting user details");
+      }
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    onError: (error: any) => {
+      toast.error(error.response?.data?.detail || "Login failed");
+    }
+  });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // Reset errors
-    setErrors({});
-
-    // Validation logic
-    const newErrors: { email?: string; password?: string } = {};
-    if (!email) {
-      newErrors.email = "Email is required.";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Please enter a valid email address.";
-    }
-
-    if (!password) {
-      newErrors.password = "Password is required.";
-    } else if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters long.";
-    }
-
-    // If there are validation errors, set them and stop submission
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    // Handle successful form submission (e.g., API call)
-    console.log("Form submitted:", { email, password });
-  };
-
-  const handleAdminLoginClick = () => {
-    router.push("/admin"); // Navigate to the /admin page
+    loginMutation.mutate({ username, password });
   };
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-zinc-900 px-4">
       <form
         onSubmit={handleSubmit}
-        noValidate // Disable browser's native validation
         className="w-full max-w-sm space-y-6 rounded-xl bg-white dark:bg-zinc-800 p-8 shadow-md dark:shadow-xl"
       >
-        <h2 className="text-2xl font-bold text-center text-black dark:text-white">
-          User Login
-        </h2>
-
-        <InputField
-          id="email"
-          label="Email"
-          type="email"
-          placeholder="you@example.com"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          error={errors.email}
-          required
-        />
-
-        <InputField
-          id="password"
-          label="Password"
-          type="password"
-          placeholder="••••••••"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          error={errors.password}
-          required
-        />
-
-        <Button type="submit" className="w-full">
-          Login
-        </Button>
-
+        <h2 className="text-2xl font-bold text-center text-black dark:text-white">Login</h2>
         <div>
-          <label
-            htmlFor="backToLogin"
-            className="block text-center cursor-pointer text-blue-500 hover:underline"
-            onClick={handleAdminLoginClick}
-          >
-            Admin Login
-          </label>
+          <Label htmlFor="username">Username</Label>
+          <Input
+            id="username"
+            type="text"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="yourusername"
+            required
+            className="mt-1"
+          />
+        </div>
+        <div>
+          <Label htmlFor="password">Password</Label>
+          <Input
+            id="password"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="••••••••"
+            required
+            className="mt-1"
+          />
+        </div>
+        <Button 
+          type="submit" 
+          className="w-full"
+          disabled={loginMutation.isPending}
+        >
+          {loginMutation.isPending ? "Logging in..." : "Login"}
+        </Button>
+        <div className="text-center text-sm">
+          Don't have an account?{" "}
+          <Link href="/signup" className="text-blue-600 hover:underline">
+            Sign up
+          </Link>
         </div>
       </form>
     </div>
