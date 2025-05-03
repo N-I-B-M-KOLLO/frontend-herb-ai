@@ -42,7 +42,7 @@ export default function Login() {
         </div>
 
         <Button type="submit" className="w-full">
-          Login In
+          Login 
         </Button>
       </form>
     </div>
