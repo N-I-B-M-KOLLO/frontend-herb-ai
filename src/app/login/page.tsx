@@ -42,7 +42,7 @@ export default function Login() {
         
       
         if (userData.is_admin) {
-          router.push("/admin/dashboard");
+          router.push("/admin-dash/admin-dashboard");
         } else {
           router.push("/dashboard");
         }
