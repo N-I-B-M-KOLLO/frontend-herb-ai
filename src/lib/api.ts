@@ -10,6 +10,7 @@ export const api = axios.create({
   },
 });
 
+// Add request interceptor to attach token to every request
 api.interceptors.request.use((config) => {
   const token = useAuthStore.getState().token;
   if (token) {
@@ -17,6 +18,24 @@ api.interceptors.request.use((config) => {
   }
   return config;
 });
+
+// Add response interceptor to handle token expiration
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Handle 401 Unauthorized errors (expired tokens)
+    if (error.response && error.response.status === 401) {
+      // Clear auth state
+      useAuthStore.getState().logout();
+      
+      // Redirect to login if we're in a browser environment
+      if (typeof window !== 'undefined') {
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const authService = {
   login: async (username: string, password: string) => {
@@ -46,5 +65,20 @@ export const authService = {
   getRegularDashboard: async () => {
     const response = await api.get('/regular/dashboard/');
     return response.data;
+  },
+  
+  // Verify token is still valid
+  verifyToken: async () => {
+    const token = useAuthStore.getState().token;
+    if (!token) return false;
+    
+    try {
+      await api.get('/users/me/');
+      return true;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    } catch (error) {
+      useAuthStore.getState().logout();
+      return false;
+    }
   },
 };

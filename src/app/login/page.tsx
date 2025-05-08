@@ -1,12 +1,10 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
-
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -16,31 +14,54 @@ import { authService } from "@/lib/api";
 export default function Login() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [isVerifying, setIsVerifying] = useState(true);
   const router = useRouter();
-  
-  const { setToken, setUser, isAuthenticated } = useAuthStore();
+ 
+  const { setToken, setUser, isAuthenticated, logout } = useAuthStore();
 
+  // Verify token on mount
   useEffect(() => {
-    if (isAuthenticated) {
+    const verifyToken = async () => {
+      try {
+        // Only proceed if there's a stored token
+        if (isAuthenticated) {
+          // Verify the token is still valid by fetching user data
+          await authService.getCurrentUser();
+          // If successful, the token is valid
+        }
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (error) {
+        // If token validation fails, log the user out
+        logout();
+        toast.error("Session expired, please login again");
+      } finally {
+        setIsVerifying(false);
+      }
+    };
+    
+    verifyToken();
+  }, [isAuthenticated, logout]);
+
+  // Only redirect after verification is complete
+  useEffect(() => {
+    if (!isVerifying && isAuthenticated) {
       router.push("/dashboard");
     }
-  }, [isAuthenticated, router]);
+  }, [isVerifying, isAuthenticated, router]);
 
   // React Query mutation for login
   const loginMutation = useMutation({
-    mutationFn: ({ username, password }: { username: string; password: string }) => 
+    mutationFn: ({ username, password }: { username: string; password: string }) =>
       authService.login(username, password),
     onSuccess: async (data) => {
       setToken(data.access_token);
-      
-      
+     
       try {
         const userData = await authService.getCurrentUser();
         setUser(userData);
-        
+       
         toast.success("Login successful!");
-        
-      
+       
         if (userData.is_admin) {
           router.push("/admin-dash/admin-dashboard");
         } else {
@@ -61,6 +82,17 @@ export default function Login() {
     e.preventDefault();
     loginMutation.mutate({ username, password });
   };
+
+  // Show loading state while verifying token
+  if (isVerifying) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-zinc-900">
+        <div className="text-center">
+          <p className="text-lg">Verifying session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 dark:bg-zinc-900 px-4">
@@ -93,8 +125,8 @@ export default function Login() {
             className="mt-1"
           />
         </div>
-        <Button 
-          type="submit" 
+        <Button
+          type="submit"
           className="w-full"
           disabled={loginMutation.isPending}
         >
