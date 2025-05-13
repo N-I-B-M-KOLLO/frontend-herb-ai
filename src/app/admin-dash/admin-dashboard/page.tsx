@@ -9,20 +9,26 @@ import {
   User,
 } from "tabler-icons-react";
 import { Logo, LogoIcon } from "@/components/admin-ui/Logo";
-import {Dashboard} from "@/components/admin-ui/Dashboard";
+import { Dashboard } from "@/components/admin-ui/Dashboard";
 import Profile from "@/components/admin-ui/Profile";
 import Settings from "@/components/admin-ui/Settings";
 import { cn } from "@/lib/utils";
 import Image from "next/image";
+import { useAuthStore } from "@/store/useAuthStore";
+import { useRouter } from "next/navigation";
 
 export default function SidebarDemo() {
   const [open, setOpen] = useState<boolean>(false);
   const [activePage, setActivePage] = useState<string>("Dashboard");
+  const { logout, user } = useAuthStore();
+  const router = useRouter();
 
   const handleNavigation = (label: string): void => {
     if (label === "Logout") {
-      // In a real app, you would handle the logout logic here
-      console.log("Logging out...");
+      // Handle logout using the auth store's logout function
+      logout();
+      // Redirect to login page
+      router.push("/login");
       return;
     }
     setActivePage(label);
@@ -52,7 +58,7 @@ export default function SidebarDemo() {
     },
     {
       label: "Logout",
-      href: "/login",
+      href: "#", // Changed from "/login" to "#" since we're handling navigation in code
       icon: (
         <ArrowLeft className="h-5 w-5 shrink-0 text-neutral-700 dark:text-neutral-200" />
       ),
@@ -94,13 +100,13 @@ export default function SidebarDemo() {
           <div>
             <SidebarLink
               link={{
-                label: "Manu Arora",
+                label: user?.username || "User",
                 href: "#",
                 icon: (
                   <Image
                     width={28}
                     height={28}
-                    src="/api/placeholder/48/48"
+                    src="/logoimage.jpg"
                     alt="Avatar"
                     className="h-7 w-7 shrink-0 rounded-full"
                   />

@@ -31,7 +31,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
   });
 
   const createUserMutation = useMutation({
-    mutationFn: (userData: { username: string; password: string; plan: string }) => {
+    mutationFn: (userData: { username: string; password: string; plan: string; is_admin: boolean }) => {
       return authService.register(userData);
     },
     onSuccess: () => {
@@ -66,6 +66,7 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
       username: formData.username,
       password: formData.password,
       plan: formData.plan,
+      is_admin: formData.isAdmin, // Send as is_admin to match backend expectations
     });
   };
 
@@ -131,13 +132,13 @@ const CreateUserModal: React.FC<CreateUserModalProps> = ({
           <div className="mb-4 flex items-center">
             <input
               type="checkbox"
-              id="is_admin"
-              name="is_admin"
+              id="isAdmin"
+              name="isAdmin"
               checked={formData.isAdmin}
               onChange={handleChange}
               className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
             />
-            <label htmlFor="is_admin" className="ml-2 block text-sm text-gray-700">
+            <label htmlFor="isAdmin" className="ml-2 block text-sm text-gray-700">
               Is Admin
             </label>
           </div>
