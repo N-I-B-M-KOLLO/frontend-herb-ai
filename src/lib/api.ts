@@ -27,7 +27,7 @@ api.interceptors.response.use(
     if (error.response && error.response.status === 401) {
       // Clear auth state
       useAuthStore.getState().logout();
-      
+     
       // Redirect to login if we're in a browser environment
       if (typeof window !== 'undefined') {
         window.location.href = '/login';
@@ -47,8 +47,13 @@ export const authService = {
     return response.data;
   },
  
-  register: async (userData: { username: string; password: string }) => {
-    const response = await api.post('/users/', userData);
+  register: async (userData: { username: string; password: string; plan: string }) => {
+    // Updated to include user_plan in the request payload
+    const response = await api.post('/users/', {
+      username: userData.username,
+      password: userData.password,
+      user_plan: userData.plan
+    });
     return response.data;
   },
  
@@ -66,12 +71,22 @@ export const authService = {
     const response = await api.get('/regular/dashboard/');
     return response.data;
   },
+ 
+  updateUserPlan: async (plan: string) => {
+    const response = await api.patch('/users/me/update-plan', { user_plan: plan });
+    return response.data;
+  },
   
+  updatePassword: async (passwords: { current_password: string; new_password: string }) => {
+    const response = await api.patch('/users/me/update-password', passwords);
+    return response.data;
+  },
+ 
   // Verify token is still valid
   verifyToken: async () => {
     const token = useAuthStore.getState().token;
     if (!token) return false;
-    
+   
     try {
       await api.get('/users/me/');
       return true;

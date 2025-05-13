@@ -5,6 +5,7 @@ interface User {
   id: number;
   username: string;
   is_admin: boolean;
+  user_plan: string; 
 }
 
 interface AuthState {
@@ -31,7 +32,7 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => localStorage),
-      
+     
       version: 1,
      
       partialize: (state) => ({
