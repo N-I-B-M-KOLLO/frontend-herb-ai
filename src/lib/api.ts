@@ -61,6 +61,11 @@ export const authService = {
     const response = await api.get('/users/me/');
     return response.data;
   },
+
+  getAllUsers: async () => {
+  const response = await api.get('/admin/users/');
+  return response.data;
+},
  
   getAdminDashboard: async () => {
     const response = await api.get('/admin/dashboard/');

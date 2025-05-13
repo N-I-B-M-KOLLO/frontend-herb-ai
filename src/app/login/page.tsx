@@ -24,13 +24,18 @@ export default function Login() {
   const [password, setPassword] = useState("");
   
   const router = useRouter();
-  const { setToken, setUser, isAuthenticated } = useAuthStore();
+  const { setToken, setUser, isAuthenticated, user } = useAuthStore();
   
   useEffect(() => {
     if (isAuthenticated) {
-      router.push("/dashboard");
+      // Redirect based on admin status
+      if (user?.is_admin) {
+        router.push("/admin-dash/admin-dashboard");
+      } else {
+        router.push("/dashboard");
+      }
     }
-  }, [isAuthenticated, router]);
+  }, [isAuthenticated, router, user]);
   
   // React Query mutation for login
   const loginMutation = useMutation({
@@ -63,7 +68,13 @@ export default function Login() {
         });
         
         toast.success("Login successful!");
-        router.push("/dashboard");
+        
+        // Redirect based on admin status
+        if (userData.is_admin) {
+          router.push("/admin-dash/admin-dashboard");
+        } else {
+          router.push("/dashboard");
+        }
       } catch (error) {
         console.error("Error processing token:", error);
         toast.error("Something went wrong with authentication");
