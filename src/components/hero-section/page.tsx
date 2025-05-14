@@ -1,18 +1,19 @@
 "use client";
-
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useRouter } from "next/navigation";
+
+
 
 export function HeroSection() {
   return (
     <div className="relative flex h-screen w-screen flex-col overflow-x-hidden">
       {/* Navbar at the top */}
       <Navbar />
-
+      
       {/* Content Container */}
       <div className="flex flex-1 flex-col items-center justify-center px-4 py-10 md:py-20">
-        <h1 className="relative z-10 mx-auto max-w-4xl text-center font-[Poppins]  text-2xl font-bold text-slate-700 md:text-4xl lg:text-7xl dark:text-slate-300">
+        <h1 className="relative z-10 mx-auto max-w-4xl text-center font-[Poppins] text-2xl font-bold text-slate-700 md:text-4xl lg:text-7xl dark:text-slate-300">
           {"Your medical questions answered, Instantly."
             .split(" ")
             .map((word, index) => (
@@ -31,7 +32,7 @@ export function HeroSection() {
               </motion.span>
             ))}
         </h1>
-
+        
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
@@ -40,9 +41,7 @@ export function HeroSection() {
         >
          🌿 With Herb AI, getting the answers you need is effortless — from expert insights and personalized herbal recommendations to stunning AI-generated visuals tailored to your wellness journey.
         </motion.p>
-
-      
-
+        
         <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -66,7 +65,7 @@ export function HeroSection() {
 
 const Navbar = () => {
   const router = useRouter();
-
+  
   return (
     <nav className="flex w-full items-center justify-between border-t border-b border-neutral-200 px-4 py-4 dark:border-neutral-800">
       <div className="flex items-center gap-2">
@@ -90,4 +89,3 @@ const Navbar = () => {
     </nav>
   );
 };
-
